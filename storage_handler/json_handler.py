@@ -1,14 +1,10 @@
 #  file made to retrive and save data to the json file
 
 from pathlib import Path
-
 import json
 
-parent_dir = (
-    Path(__file__).resolve().parent.parent
-)  # added path to the root directory in resolve method so that the code works from any destination and the adress is not just relative
+parent_dir = (Path(__file__).resolve().parent.parent)  # added path to the root directory in resolve method so that the code works from any destination and the adress is not just relative
 data_file = Path(parent_dir) / "data" / "students.json"
-
 
 def get_data() -> dict:
     """
@@ -47,8 +43,10 @@ def set_data(data: dict) -> bool:
             parents=True, exist_ok=True
         )  # here the parent of the json file checks for the existance of directory and parent of directory as arguments are used and won't throw error even if file exists already
        
-        with open(data_file, "w") as f:
+        temp_file = data_file.with_suffix(".tmp")
+        with open(temp_file, "w") as f:
             json.dump(data, f, indent=4)
+        temp_file.replace(data_file)
         return True
     except TypeError as e:
         print(f"Type error in JSON serialization: {e}\n")
