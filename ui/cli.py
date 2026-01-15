@@ -1,96 +1,149 @@
 #  to take user inputs and also print the cli elements
 
-from services import manager
+from services.manager import StudentManager
+from student_logging.student_log  import LogInfo
 
-SUCCESS = "\033[92m"
-ERROR= "\033[91m"
-RESET= "\033[0m"
+class StudentCli:
 
-def main_menu():
-    """
-    generates an interractive menu
-    """
-    print("1. Add Student")
-    print("2. View All Students")
-    print("3. Search Student")
-    print("4. Delete Student")
-    print("5. Calculate Percentage")
-    print("6. Exit")
-    return input("Select an option (1-6): ").strip()
+    RED="\033[31m"
+    GREEN="\033[32m"
+    RESET="\033[0m"
 
+    def __init__(self, manager):
+        self.manager = manager
 
-print(f"\n{'-'*40}STUDENT MANAGEMENT SYSTEM{'-'*40}")
-while True:
-    choice = main_menu()
-    match choice:
-        case "1":
-            try:
-                name = input("Enter name of the student: ").strip().lower()
-                std = input("Enter class: ").strip()
-                roll = input("Enter roll number: ").strip()
-                marks = []
-                marks_from_user = input("Enter marks: ").split()
-                for item in marks_from_user:
+    @staticmethod
+    def main_menu():
+        """
+        generates an interractive menu
+        """
+        print("1. Add Student")
+        print("2. View All Students")
+        print("3. Search Student")
+        print("4. Delete Student")
+        print("5. Calculate Percentage")
+        print("6. Exit")
+        return input("Select an option (1-6): ").strip()
+
+    @staticmethod
+    def display_header():
+        print(f"\n{'-'*40}STUDENT MANAGEMENT SYSTEM{'-'*40}")
+        LogInfo.log_info("Program accessed")
+
+    @staticmethod
+    def end_note():
+        print(f"\n{'-'*40}PROGRAM ENDS{'-'*40}")
+        LogInfo.log_info("program ended\n")
+
+    def get_input(self,prompt:str):
+        return input(prompt).strip()
+    
+    def handle_add(self):
+        try:
+            name=self.get_input("Enter name: ").lower()
+            std=self.get_input("Enter standard: ").lower()
+            roll=self.get_input("Enter roll number: ").lower()
+            marks=[]
+            raw_marks=self.get_input("Enter marks: ")
+            for item in raw_marks.split():
                     marks.append(int(item))
-
-                res = manager.add_student(name, std, roll, marks)
-                if res == False:
-                    print("Error: Student already exists.\n")
-                else:
-                    print(f"{SUCCESS}Success{RESET}: Student added.\n")
-            except ValueError:
-                print(f"{ERROR}Error{RESET}: Enter valid values.\n")
-
-        case "2":
-            students = manager.view_list()
-            for student in students:
+            if self.manager.add_student(name, std, roll, marks):
+                print(f"{self.GREEN}Success{self.RESET}:Student added successfully!")
+                LogInfo.log_info("New student added")
+            else:
+                print(f"{self.RED}Error{self.RESET}:Student already exists!")
+        except ValueError:
+            print("Invalid input.")
+            LogInfo.log_error("adder value error")
+            
+    def handle_view(self):
+        students = self.manager.view_list()
+        for student in students:
             # This prints each student on a clean new line
-                print(f" Name: {student['name'].title()} | Std: {student['standard']} | Roll: {student['roll_number']} | Marks: {student["marks"]}")
+            print(f"Std: {student['standard']}  |   Name: {student['name'].title()}  |  Roll: {student['roll_number']}  |  Marks: {student['marks']}")
+            LogInfo.log_info("List Viewed")
 
-        case "3":
-            try:
-                sub_choice = input("Choose:\n\ta. by roll number\n\tb. by name\n")
-                if sub_choice == "a":
-                    std = input("Enter class: ").strip()
-                    roll = input("ENter roll").strip()
-                    (
-                        print(f"{manager.search_by_roll(std, roll)}\n")
-                        if manager.search_by_roll(std, roll) != False
-                        else print(f"{ERROR}Error{RESET}: Data not found.\n")
-                    )
-                if sub_choice == "b":
-                    name = input("Enter name: ").strip().lower()
-                    (
-                        print(f"{manager.search_by_name(name)}\n")
-                        if manager.search_by_name(name) != False
-                        else print(f"{ERROR}Error{RESET}: Data not found.\n")
-                    )
-            except ValueError:
-                print(f"{ERROR}Error{RESET}: Enter valid values.\n")
+    def handle_search(self):
+        sub_choice=self.get_input("Choose:\n\ta. by roll number\n\tb. by name\n")
+        if sub_choice=="a":
+            self.search_by_roll()
+        if sub_choice=="b":
+            self.search_by_name()
 
-        case "4":
-            try:
-                std = input("Enter class: ").strip()
-                roll = input("ENter roll").strip()
-                res = manager.delete_student(std, roll)
-                (
-                    print(f"{SUCCESS}Success{RESET}: Data deleted.\n")
-                    if res != False
-                    else print(f"{ERROR}Error{RESET}: Data not found.\n")
-                )
-            except ValueError as e:
-                print(f"{ERROR}Error{RESET}: Enter valid values.{e}\n")
+    def handle_deletion(self):
+        try: 
+            std=self.get_input("Enter standard: ")
+            roll=self.get_input("Enter roll number: ")
+            result=self.manager.delete_student(std, roll)
+            if result:
+                print(f"{self.GREEN}Success{self.RESET}: Data deleted.\n")
+                LogInfo.log_info("student deleted")
+            else:
+                print(f"{self.RED}Error{self.RESET}: Data not found.\n") 
+        except ValueError as e:
+                print(f"{self.RED}Error{self.RESET}: Enter valid values.{e}\n")
+                LogInfo.log_error("deletion value error")
 
-        case "5":
-            std = input("Enter class: ").strip()
-            roll = input("Enter roll: ").strip()
-            per = manager.per_marks(std, roll)
-            (
-                print(f"The percentage obtained by student are {per}\n")
-                if per is not False
-                else print(f"{ERROR}Error{RESET}: Data not found.\n")
-            )
+    def handle_per(self):
+        std = self.get_input("Enter class: ")
+        roll = self.get_input("Enter roll number: ")
+        result = self.manager.per_marks(std, roll)
+        if result:
+            print(f"The percentage obtained by student are {result}\n")
+            LogInfo.log_info("percentage accessed")
+        else:
+            print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
-        case "6":
-            print(f"\n{'-'*40}PROGRAM ENDS{'-'*40}")
-            break
+    def search_by_roll(self):
+        try:
+            std=self.get_input("Enter standard: ")        
+            roll=self.get_input("Enter roll number: ")
+            result=self.manager.search_by_roll(std, roll)
+            if result:
+                print(f"{result}\n")
+                LogInfo.log_info("student searched")
+            else:             
+                print(f"{self.RED}Error{self.RESET}: Data not found.\n")
+        except ValueError:
+                print(f"{self.RED}Error{self.RESET}: Enter valid values.\n")
+                LogInfo.log_error("search value error")
+            
+    def search_by_name(self):
+        try: 
+            name=self.get_input("Enter name: ")
+            result=self.manager.search_by_name(name)
+            if result:  
+                print(f"{result}\n")
+                LogInfo.log_info("student searched")
+            else:
+                print(f"{self.RED}Error{self.RESET}: Data not found.\n")
+        except ValueError:
+                print(f"{self.RED}Error{self.RESET}: Enter valid values.\n")
+                LogInfo.log_error("search value error")
+    def run(self):
+        self.display_header()
+        while True:
+            choice = StudentCli.main_menu()
+            match choice:
+                case "1":
+                    self.handle_add()
+
+                case "2":
+                    self.handle_view()
+
+                case "3":
+                    self.handle_search()
+
+                case "4":
+                    self.handle_deletion()           
+                    
+                case "5":
+                    self.handle_per()
+
+                case "6":
+                    self.end_note()
+                    break
+
+
+s1=StudentCli(StudentManager())
+s1.run()

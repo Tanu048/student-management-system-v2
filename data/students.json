@@ -1,0 +1,29 @@
+{
+    "1-1": {
+        "name": "ashi",
+        "standard": "1",
+        "roll_number": "1",
+        "marks": [
+            15,
+            18,
+            16,
+            14,
+            20
+        ],
+        "date_created": "15-01-26 23:02:57",
+        "percentage": 16.6
+    },
+    "2-1": {
+        "name": "ashu",
+        "standard": "2",
+        "roll_number": "1",
+        "marks": [
+            18,
+            19,
+            16,
+            15,
+            19
+        ],
+        "date_created": "15-01-26 23:12:15"
+    }
+}
