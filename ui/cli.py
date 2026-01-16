@@ -58,6 +58,8 @@ class StudentCli:
             
     def handle_view(self):
         students = self.manager.view_list()
+        if not students:
+            print(f"{StudentCli.RED}Error{StudentCli.RESET}: FIle is either corrupted or non existing.")
         for student in students:
             # This prints each student on a clean new line
             print(f"Std: {student['standard']}  |   Name: {student['name'].title()}  |  Roll: {student['roll_number']}  |  Marks: {student['marks']}")
