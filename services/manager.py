@@ -1,7 +1,7 @@
 #  to perform the functions user wants
 
 from models.student import Student
-from storage_handler.json_handler import get_data, set_data
+from storage_handler.json_handler import StudentJson
 
 
 class StudentManager:
@@ -11,7 +11,7 @@ class StudentManager:
 
     def _load_initial_data(self):
         """Internal helper to fetch data from JSON"""
-        data = get_data()
+        data = StudentJson.get_data()
         return data
 
     def add_student(
@@ -43,7 +43,7 @@ class StudentManager:
             return False
         new = Student(name, standard, roll_no, marks)
         self.data[key] = new.to_dict()
-        return set_data(self.data)
+        return StudentJson.set_data(self.data)
 
     def view_list(self) -> list[dict]:
         """Return all students excluding creation timestamps."""
@@ -74,7 +74,7 @@ class StudentManager:
     def delete_student(self, std: str, roll: str) -> bool:
         if f"{std}-{roll}" in self.data:
             del self.data[f"{std}-{roll}"]
-            set_data(self.data)
+            StudentJson.set_data(self.data)
             return True
         else:
             return False
@@ -91,5 +91,5 @@ class StudentManager:
             return None
         percentage = sum(marks) / len(marks)
         student["percentage"] = round(percentage, 2)
-        set_data(self.data)
+        StudentJson.set_data(self.data)
         return student["percentage"]
