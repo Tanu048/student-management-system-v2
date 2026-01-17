@@ -7,8 +7,8 @@ class Student:
 
     def __init__(self, name: str, standard: str, roll_number: str, marks: list[int]):
         """Initialize a Student instance with validation and timestamp."""
-        if not name or not isinstance(name, str):
-            raise ValueError("Name must be non-empty string")
+        # if not name or not isinstance(name, str):
+        #     raise ValueError("Name must be non-empty string")
         
         self._name = name
         self._standard = standard

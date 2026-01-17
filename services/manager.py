@@ -29,15 +29,6 @@ class StudentManager:
         Raises:
             ValueError: If marks are invalid
         """
-        if not name or not name.strip():
-            raise ValueError("Name cannot be empty")
-        if not standard or not standard.strip():
-            raise ValueError("Standard cannot be empty")
-        if not isinstance(marks, list) or not marks:
-            raise ValueError("Marks must be a non-empty list")
-        if not all(isinstance(m, int) and 0 <= m <= 100 for m in marks):
-            raise ValueError("All marks must be integers between 0-100")
-
         key = f"{standard}-{roll_no}"
         if key in self.data:
             return False
