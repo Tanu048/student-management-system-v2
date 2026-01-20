@@ -51,7 +51,6 @@ class StudentCli:
         if check_inputs(name=name, std=std, roll=roll, marks=marks):
             if self.manager.add_student(name, std, roll, marks):
                 print(f"{self.GREEN}Success{self.RESET}:Student added successfully!")
-                LogInfo.log_info("New student added")
             else:
                 print(f"{self.RED}Error{self.RESET}:Student already exists!")
 
@@ -66,7 +65,6 @@ class StudentCli:
             print(
                 f"Std: {student['standard']}  |   Name: {student['name'].title()}  |  Roll: {student['roll_number']}  |  Marks: {student['marks']}"
             )
-            LogInfo.log_info("List Viewed")
 
     def handle_search(self):
         sub_choice = self.get_input("Choose:\n\ta. by roll number\n\tb. by name\n")
@@ -83,18 +81,16 @@ class StudentCli:
         if check_inputs(std=std, roll=roll):
             if result:
                 print(f"{self.GREEN}Success{self.RESET}: Data deleted.\n")
-                LogInfo.log_info("student deleted")
             else:
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
     def handle_per(self):
         std = self.get_input("Enter standard: ")
         roll = self.get_input("Enter roll number: ")
-        result = self.manager.per_marks(std, roll)
+        result = self.manager.per_calc(std, roll)
         if check_inputs(std=std,roll=roll):
             if result:
                 print(f"The percentage obtained by student are {result}\n")
-                LogInfo.log_info("percentage accessed")
             else:
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
@@ -105,7 +101,6 @@ class StudentCli:
         if check_inputs(std=std,roll=roll):
             if result:
                 print(f"{result}\n")
-                LogInfo.log_info("student searched")
             else:
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
@@ -114,8 +109,9 @@ class StudentCli:
         result = self.manager.search_by_name(name)
         if check_inputs(name=name):
             if result:
-                print(f"{result}\n")
-                LogInfo.log_info("student searched")
+                print(
+                f"Std: {result['standard']}  |   Name: {result['name'].title()}  |  Roll: {result['roll_number']}  |  Marks: {result['marks']}"
+            )
             else:
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
