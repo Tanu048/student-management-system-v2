@@ -2,6 +2,7 @@
 
 from models.student import Student
 from storage_handler.json_handler import StudentJson
+from student_logging.student_log import LogInfo
 
 
 class StudentManager:
@@ -15,7 +16,7 @@ class StudentManager:
         return data
 
     def add_student(
-        self, name: str, standard: str, roll_no: str, marks: list[int]
+        self, name: str, std: str, roll: str, marks: list[int]
     ) -> bool:
         """
         Add a new student to the system.
@@ -29,10 +30,10 @@ class StudentManager:
         Raises:
             ValueError: If marks are invalid
         """
-        key = f"{standard}-{roll_no}"
+        key = f"{std}-{roll}"
         if key in self.data:
             return False
-        new = Student(name, standard, roll_no, marks)
+        new = Student(name, std, roll, marks)
         self.data[key] = new.to_dict()
         return StudentJson.set_data(self.data)
 
@@ -43,13 +44,13 @@ class StudentManager:
             for student in self.data.values()
         ]
 
-    def search_by_roll(self, std: str, roll_no: str) -> dict | None:
+    def search_by_roll(self, std: str, roll: str) -> dict | None:
         """
         Searches for a specific student by their unique class-roll key.
         Returns:
             dict: Student data if found, None otherwise.
         """
-        key = f"{std}-{roll_no}"
+        key = f"{std}-{roll}"
 
         # Use .get() - it returns None automatically if the key doesn't exist
         return self.data.get(key)
@@ -71,16 +72,15 @@ class StudentManager:
             return False
 
    
-    def per_marks(self, std: str, roll: str) -> float | None:
+    def per_calc(self, std: str, roll: str) -> float | None:
         """Calculate and store average percentage for a student."""
         key = f"{std}-{roll}"
         student = self.data.get(key)
         if not student:
             return None
-        marks = student.get("marks", [])
-        if not marks:
+        percent = student["percentage"]
+        if not percent:
             return None
-        percentage = sum(marks) / len(marks)
-        student["percentage"] = round(percentage, 2)
+        LogInfo.log_info("percentage accessed")
         StudentJson.set_data(self.data)
-        return student["percentage"]
+        return percent
