@@ -5,14 +5,14 @@ from datetime import datetime
 
 class Student:
 
-    def __init__(self, name: str, standard: str, roll_number: str, marks: list[int]):
+    def __init__(self, name: str, std: str, roll: str, marks: list[int]):
         """Initialize a Student instance with validation and timestamp."""
         # if not name or not isinstance(name, str):
         #     raise ValueError("Name must be non-empty string")
         
         self._name = name
-        self._standard = standard
-        self._roll_number = roll_number
+        self._std = std
+        self._roll = roll
         self._marks = marks
         self._date_created = datetime.now().strftime("%d-%m-%y %H:%M:%S")
         
@@ -21,8 +21,16 @@ class Student:
         """Returns a dictionary with a fixed order of fields."""
         return {
             "name": self._name,
-            "standard": self._standard,
-            "roll_number": self._roll_number,
+            "standard": self._std,
+            "roll_number": self._roll,
             "marks": self._marks,
+            "percentage":self._percentage,
             "date_created": self._date_created,
         }
+    
+    @property
+    def percentage(self):
+        marks = self._marks
+        if not marks:
+            return None
+        return sum(marks) / len(marks)
