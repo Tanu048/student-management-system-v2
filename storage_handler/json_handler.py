@@ -38,8 +38,7 @@ class StudentJson:
         """
         try:
             StudentJson._data_file.parent.mkdir(
-                parents=True, exist_ok=True
-            )  # here the parent of the json file checks for the existance of directory and parent of directory as arguments are used and won't throw error even if file exists already
+                parents=True, exist_ok=True )  # here the parent of the json file checks for the existance of directory and parent of directory as arguments are used and won't throw error even if file exists already
         
             temp_file = StudentJson._data_file.with_suffix(".tmp")
             with open(temp_file, "w") as f:
