@@ -10,14 +10,12 @@ class StudentManager:
     def __init__(self):
         self.data = self._load_initial_data()
 
-    def _load_initial_data(self):
+    def _load_initial_data(self) -> dict:
         """Internal helper to fetch data from JSON"""
         data = StudentJson.get_data()
         return data
 
-    def add_student(
-        self, name: str, std: str, roll: str, marks: list[int]
-    ) -> bool:
+    def add_student(self, name: str, std: str, roll: str, marks: list[int]) -> bool:
         """
         Add a new student to the system.
         Args:
@@ -35,14 +33,13 @@ class StudentManager:
             return False
         new = Student(name, std, roll, marks)
         self.data[key] = new.to_dict()
+        LogInfo.log_info("New student added")
         return StudentJson.set_data(self.data)
 
-    def view_list(self) -> list[dict]:
+    def view_list(self) -> dict:
         """Return all students excluding creation timestamps."""
-        return [
-            {k: v for k, v in student.items() if k != "date_created"}
-            for student in self.data.values()
-        ]
+        LogInfo.log_info("List viewed")
+        return {keys: values for keys, values in self.data.items()}
 
     def search_by_roll(self, std: str, roll: str) -> dict | None:
         """
@@ -50,28 +47,30 @@ class StudentManager:
         Returns:
             dict: Student data if found, None otherwise.
         """
+        LogInfo.log_info("Stduent searched")
         key = f"{std}-{roll}"
-
         # Use .get() - it returns None automatically if the key doesn't exist
         return self.data.get(key)
 
-    def search_by_name(self, name: str) -> list:
-        """Returns list of matching students (empty if none found)."""
-        return [
-            {k: v for k, v in student.items() if k != "date_created"}
-            for student in self.data.values()
-            if name in student["name"]
-        ]
+    def search_by_name(self, name: str) -> dict:
+        """Returns matching students keyed by std-roll."""
+        LogInfo.log_info("Stduent searched")
+        data = self._load_initial_data()
+        result = {}
+        for key, student in data.items():
+            if name.lower() in student["name"].lower():
+                result[key] = student
+        return result
 
     def delete_student(self, std: str, roll: str) -> bool:
         if f"{std}-{roll}" in self.data:
             del self.data[f"{std}-{roll}"]
+            LogInfo.log_info("Student deleted")
             StudentJson.set_data(self.data)
             return True
         else:
             return False
 
-   
     def per_calc(self, std: str, roll: str) -> float | None:
         """Calculate and store average percentage for a student."""
         key = f"{std}-{roll}"
