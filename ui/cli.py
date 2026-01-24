@@ -52,18 +52,20 @@ class StudentCli:
             if self.manager.add_student(name, std, roll, marks):
                 print(f"{self.GREEN}Success{self.RESET}:Student added successfully!")
             else:
+                LogInfo.log_error("Duplication detected")
                 print(f"{self.RED}Error{self.RESET}:Student already exists!")
 
+                
     def handle_view(self):
         students = self.manager.view_list()
         if not students:
+            LogInfo.log_error("Empty list viewing")
             print(
                 f"{StudentCli.RED}Error{StudentCli.RESET}: FIle is either corrupted, empty or non existing."
             )
-        for student in students:
-            # This prints each student on a clean new line
+        for student_key in students:
             print(
-                f"Std: {student['standard']}  |   Name: {student['name'].title()}  |  Roll: {student['roll_number']}  |  Marks: {student['marks']}"
+                f"Name: {students[student_key]["name"]} | Standard: {students[student_key]["standard"]} | Roll Number: {students[student_key]["roll_number"]} | Marks: {students[student_key]["marks"]} | Percentage: {students[student_key]["percentage"]}"
             )
 
     def handle_search(self):
@@ -82,6 +84,7 @@ class StudentCli:
             if result:
                 print(f"{self.GREEN}Success{self.RESET}: Data deleted.\n")
             else:
+                LogInfo.log_error("Deletion failed")
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
     def handle_per(self):
@@ -92,6 +95,7 @@ class StudentCli:
             if result:
                 print(f"The percentage obtained by student are {result}\n")
             else:
+                LogInfo.log_error("percentage access failed")
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
     def search_by_roll(self):
@@ -102,6 +106,7 @@ class StudentCli:
             if result:
                 print(f"{result}\n")
             else:
+                LogInfo.log_error("search intruppted")
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
     def search_by_name(self):
@@ -109,10 +114,12 @@ class StudentCli:
         result = self.manager.search_by_name(name)
         if check_inputs(name=name):
             if result:
+              for student_key in result:
                 print(
-                f"Std: {result['standard']}  |   Name: {result['name'].title()}  |  Roll: {result['roll_number']}  |  Marks: {result['marks']}"
+                f"Name: {result[student_key]["name"]} | Standard: {result[student_key]["standard"]} | Roll Number: {result[student_key]["roll_number"]} | Marks: {result[student_key]["marks"]} | Percentage: {result[student_key]["percentage"]}"
             )
-            else:
+            else:                
+                LogInfo.log_error("search intruppted")
                 print(f"{self.RED}Error{self.RESET}: Data not found.\n")
 
     def run(self):

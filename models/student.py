@@ -7,9 +7,7 @@ class Student:
 
     def __init__(self, name: str, std: str, roll: str, marks: list[int]):
         """Initialize a Student instance with validation and timestamp."""
-        # if not name or not isinstance(name, str):
-        #     raise ValueError("Name must be non-empty string")
-        
+            
         self._name = name
         self._std = std
         self._roll = roll
@@ -24,7 +22,7 @@ class Student:
             "standard": self._std,
             "roll_number": self._roll,
             "marks": self._marks,
-            "percentage":self._percentage,
+            "percentage":self.percentage,
             "date_created": self._date_created,
         }
     

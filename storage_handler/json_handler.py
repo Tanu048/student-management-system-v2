@@ -9,6 +9,7 @@ class StudentJson:
     # added path to the root directory in resolve method so that the code works from any destination and the adress is not just relative
     _data_file = Path((Path(__file__).resolve().parent.parent)) / "data" / "students.json"
 
+    @staticmethod
     def get_data() -> dict:
         """
         Fetches the current student dataset from the JSON file.
@@ -27,7 +28,7 @@ class StudentJson:
 
         return data
 
-
+    @staticmethod
     def set_data(data: dict) -> bool:
         """
         Persists the student dataset to a JSON file using an atomic-style write.

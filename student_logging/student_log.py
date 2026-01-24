@@ -18,6 +18,3 @@ class LogInfo:
 
     def log_info(message:str):
         return LogInfo.logger.info(message, stacklevel=3)
-    
-    def log_warning(message:str):
-        return LogInfo.logger.warning(message, stacklevel=3)

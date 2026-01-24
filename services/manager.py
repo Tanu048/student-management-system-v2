@@ -55,9 +55,8 @@ class StudentManager:
     def search_by_name(self, name: str) -> dict:
         """Returns matching students keyed by std-roll."""
         LogInfo.log_info("Stduent searched")
-        data = self._load_initial_data()
         result = {}
-        for key, student in data.items():
+        for key, student in self.data.items():
             if name.lower() in student["name"].lower():
                 result[key] = student
         return result

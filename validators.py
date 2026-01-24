@@ -57,16 +57,7 @@ def check_inputs(
 
 
 def check_choice(choice: str) -> bool:
-    if (
-        choice == "1"
-        or choice == "2"
-        or choice == "3"
-        or choice == "4"
-        or choice == "5"
-        or choice == "6"
-        or choice == "a"
-        or choice == "b"
-    ):
+    if choice in ["1","2","3","4","5","6","a","b"]:
         return True
     else:
         print("Please choose from the above given options!!!")
