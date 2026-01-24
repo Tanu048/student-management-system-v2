@@ -1,9 +1,14 @@
+import pytest
 from validators import check_inputs, check_choice
 
+@pytest.fixture(autouse=True)
+def mock_logging(mocker):
+    mocker.patch("student_logging.student_log.LogInfo.log_info")
+    mocker.patch("student_logging.student_log.LogInfo.log_error")
 
 def test_check_inputs_valid():
     assert check_inputs(
-        name="tanu",
+        name="riya",
         std="10",
         roll="1",
         marks=[80, 90],
