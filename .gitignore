@@ -1,5 +1,7 @@
-# Byte-compiled / optimized files
 __pycache__/
 *.py[cod]
-
 venv/
+student_logging/*.log
+.pytest_cache/
+htmlcov/
+.coverage
