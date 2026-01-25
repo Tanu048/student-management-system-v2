@@ -13,8 +13,10 @@ class LogInfo:
     
     logger.addHandler(file_handler)
 
+    @staticmethod
     def log_error(message:str):
         return LogInfo.logger.error(message, stacklevel=3)
 
+    @staticmethod
     def log_info(message:str):
         return LogInfo.logger.info(message, stacklevel=3)

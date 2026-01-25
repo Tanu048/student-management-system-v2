@@ -13,17 +13,22 @@ class ValidateStudent(BaseModel):
     name: str = Field(..., min_length=1)
     std: str = Field(..., min_length=1)
     roll: str = Field(..., min_length=1)
-    marks: List[conint(ge=0,le=100)] = Field(min_length=1, max_length=5)  # best done via annotation
+    marks: List[conint(ge=0, le=100)] = Field(
+        min_length=1, max_length=5
+    )  # best done via annotation
+
 
 class MessageResponse(BaseModel):
     message: str
 
 
-@app.post("/add_students")
-def add_student(student: ValidateStudent, response_model=MessageResponse):
+@app.post("/add_students", response_model=MessageResponse)
+def add_student(student: ValidateStudent):
     key = f"{student.std}-{student.roll}"
     if key in manager.data:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Student already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Student already exists"
+        )
     manager.add_student(
         name=student.name,
         std=student.std,
@@ -34,9 +39,8 @@ def add_student(student: ValidateStudent, response_model=MessageResponse):
 
 
 @app.get("/view_students")
-def get_student()->dict[str,dict]:
+def get_student() -> dict[str, dict]:
     return manager.view_list()
-
 
 
 @app.get("/students/search/by_roll")
@@ -57,7 +61,7 @@ def get_student_by_name(name: str = Query(..., min_size=1)) -> dict:
     student = manager.search_by_name(name)
     if not student:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Student {name} does not exist",
         )
     else:
@@ -77,11 +81,9 @@ def get_percentage(
     return percent
 
 
-@app.delete("/delete_students")
+@app.delete("/delete_students", response_model=MessageResponse)
 def delete_student(
-    std: str = Query(..., min_size=1),
-    roll: str = Query(..., min_size=1),
-    response_model=MessageResponse
+    std: str = Query(..., min_size=1), roll: str = Query(..., min_size=1)
 ):
     deleted = manager.delete_student(std, roll)
     if not deleted:

@@ -71,7 +71,7 @@ def test_search_by_name_found(client):
 
 def test_search_by_name_not_found(client):
     response = client.get("/students/search/by_name",params={"name": "ghost"},)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_percentage_found(client):
