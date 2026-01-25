@@ -13,7 +13,7 @@ def check_inputs(
     
     checker = True
     if name is not None:
-        if not name.strip():
+        if not name:
             checker = False
             LogInfo.log_error(empty_error)
             print("Error: Name cannot be empty")
@@ -22,7 +22,7 @@ def check_inputs(
             print("Error: Name is supposed to be a string")
             checker = False
     if std is not None:
-        if not std.strip():
+        if not std:
             checker = False
             LogInfo.log_error(empty_error)
             print("Error: Standard cannot be empty")
@@ -31,7 +31,7 @@ def check_inputs(
             print("Error:  is supposed to be a string")
             checker = False
     if roll is not None:
-        if not roll.strip():
+        if not roll:
             checker = False
             LogInfo.log_error(empty_error)
             print("Error: Roll number cannot be empty")
@@ -50,7 +50,7 @@ def check_inputs(
             checker = False
         elif not all(isinstance(m, int) and 0 <= m <= 100 for m in marks):
             LogInfo.log_error("Marks value exceeded")
-            print("Error: All marks must be integers between 0–100")
+            print("Error: All marks must be integers between 0-100")
             checker = False
 
     return checker
