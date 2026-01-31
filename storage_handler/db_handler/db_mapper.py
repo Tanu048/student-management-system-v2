@@ -8,7 +8,7 @@ def student_to_db(student: Student) -> StudentDBModel:
         std=student._std,
         roll=student._roll,
         marks=student._marks,
-        per=student.per,
+        per=student.percentage,
     )
 
 def db_to_student_dict(db: StudentDBModel) -> dict:
