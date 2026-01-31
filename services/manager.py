@@ -5,19 +5,17 @@ from storage_handler.db_handler.db_mapper import db_to_student_dict
 from storage_handler.json_handler import StudentJson
 from student_logging.student_log import LogInfo
 
-
 class StudentManager:
 
     def __init__(self):
         self.data= self._load_initial_data()
-
 
     def _load_initial_data(self) -> dict:
         """Internal helper to fetch data from postgresql"""
         db_data=StudentDB()
         data = { s.id : db_to_student_dict(s) for s in db_data.get_all()}
         return data
-
+    
     def add_student(self, name: str, std: str, roll: str, marks: list[int]) -> bool:
         """
         Add a new student to the system.
@@ -34,16 +32,18 @@ class StudentManager:
         key = f"{std}-{roll}"
         if key in self.data:
             return False
-        else:
-            student = Student(name, std, roll, marks)
-            db=StudentDB()
-            return db.add(student)
+        student = Student(name, std, roll, marks)
+        db=StudentDB()
+        success=db.add(student)
+        self.data = self._load_initial_data()
+        return success
             
 
     def view_list(self) -> dict:
         """Return all students excluding creation timestamps."""
         LogInfo.log_info("List viewed")
-        return {keys: values for keys, values in self.data.items()}
+        data_dict=StudentManager._load_initial_data(self)
+        return {keys: values for keys, values in data_dict.items()}
 
     def search_by_roll(self, std: str, roll: str) -> dict | None:
         """
@@ -51,6 +51,7 @@ class StudentManager:
         Returns:
             dict: Student data if found, None otherwise.
         """
+        data_dict=StudentManager._load_initial_data(self)
         LogInfo.log_info("Stduent searched")
         key = f"{std}-{roll}"
         # Use .get() - it returns None automatically if the key doesn't exist
@@ -66,13 +67,15 @@ class StudentManager:
         return result
 
     def delete_student(self, std: str, roll: str) -> bool:
-        if f"{std}-{roll}" in self.data:
-            del self.data[f"{std}-{roll}"]
-            LogInfo.log_info("Student deleted")
-            StudentJson.set_data(self.data)
-            return True
-        else:
+        key = f"{std}-{roll}"
+        if key not in self.data:
             return False
+        db = StudentDB()
+        success = db.delete_db(key)
+        if success:
+            del self.data[key]
+            LogInfo.log_info("Student deleted")
+        return success
 
     def per_calc(self, std: str, roll: str) -> float | None:
         """Calculate and store average percentage for a student."""
