@@ -1,26 +1,29 @@
-# adding database using sqlalchemy, postgres etc
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
+from storage_handler.db_handler.db_model import StudentDBModel, Base
+from storage_handler.db_handler.db_mapper import student_to_db
 
-from sqlalchemy import create_engine, Integer, String, Column, Float, MetaData
-from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
-engine = create_engine('postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database', echo=True)
+class StudentDB:
+    engine = create_engine("postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database")
 
-Session = sessionmaker(bind=engine)
-session = Session()
+    def __init__(self):
+        sessionLocal = sessionmaker(bind=StudentDB.engine)
+        self.session=sessionLocal()
 
-Base = declarative_base()
+    def add(self, student) -> bool:
+        try:
+            db_student = student_to_db(student)
+            self.session.add(db_student)
+            self.session.commit()
+            return True
+        except IntegrityError:
+            self.session.rollback()
+            return False
 
-class Student(Base):
-    __tablename__='student'
-    student_id=Column(Integer, primary_key=True)
-    student_name=Column(String)
+    def get_all(self) -> list[StudentDBModel]:
+        return self.session.query(StudentDBModel).all()
 
-Base.metadata.create_all(engine)
-
-new_student=Student(student_id=8, student_name="bhumi")
-session.add(new_student)
-
-delete_student= session.query(Student).filter(Student.student_id>1).delete()
-session.commit()
-
-print([t.student_name for t in delete_student])
+    def make_relation():
+        Base.metadata.create_all(StudentDB.engine)
