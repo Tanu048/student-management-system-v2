@@ -1,6 +1,7 @@
 #  to perform the functions user wants
-
 from models.student import Student
+from storage_handler.db_handler.db_handler import StudentDB
+from storage_handler.db_handler.db_mapper import db_to_student_dict
 from storage_handler.json_handler import StudentJson
 from student_logging.student_log import LogInfo
 
@@ -8,11 +9,13 @@ from student_logging.student_log import LogInfo
 class StudentManager:
 
     def __init__(self):
-        self.data = self._load_initial_data()
+        self.data= self._load_initial_data()
+
 
     def _load_initial_data(self) -> dict:
-        """Internal helper to fetch data from JSON"""
-        data = StudentJson.get_data()
+        """Internal helper to fetch data from postgresql"""
+        db_data=StudentDB()
+        data = { s.id : db_to_student_dict(s) for s in db_data.get_all()}
         return data
 
     def add_student(self, name: str, std: str, roll: str, marks: list[int]) -> bool:
@@ -31,10 +34,11 @@ class StudentManager:
         key = f"{std}-{roll}"
         if key in self.data:
             return False
-        new = Student(name, std, roll, marks)
-        self.data[key] = new.to_dict()
-        LogInfo.log_info("New student added")
-        return StudentJson.set_data(self.data)
+        else:
+            student = Student(name, std, roll, marks)
+            db=StudentDB()
+            return db.add(student)
+            
 
     def view_list(self) -> dict:
         """Return all students excluding creation timestamps."""
