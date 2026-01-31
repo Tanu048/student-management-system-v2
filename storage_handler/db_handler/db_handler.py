@@ -6,11 +6,22 @@ from storage_handler.db_handler.db_mapper import student_to_db
 
 
 class StudentDB:
-    engine = create_engine("postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database")
+    engine = create_engine(
+        "postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database"
+    )
+    """
+    PostgreSQL connection manager using SQLAlchemy.    
+    Handles database operations with transaction support.
+    Uses connection pooling for efficiency.    
+    Attributes:
+        engine: SQLAlchemy engine (class-level, shared connection pool)
+    """
 
     def __init__(self):
+        """Initialize a new database session.
+        Creates a new session for database operations."""
         sessionLocal = sessionmaker(bind=StudentDB.engine)
-        self.session=sessionLocal()
+        self.session = sessionLocal()
 
     def add(self, student) -> bool:
         try:
@@ -21,8 +32,8 @@ class StudentDB:
         except IntegrityError:
             self.session.rollback()
             return False
-        
-    def delete_db(self, key:str)-> bool:
+
+    def delete_db(self, key: str) -> bool:
         try:
             student = self.session.get(StudentDBModel, key)
             if student:
@@ -37,6 +48,3 @@ class StudentDB:
 
     def get_all(self) -> list[StudentDBModel]:
         return self.session.query(StudentDBModel).all()
-
-    def make_relation():
-        Base.metadata.create_all(StudentDB.engine)
