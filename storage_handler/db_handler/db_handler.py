@@ -21,6 +21,19 @@ class StudentDB:
         except IntegrityError:
             self.session.rollback()
             return False
+        
+    def delete_db(self, key:str)-> bool:
+        try:
+            student = self.session.get(StudentDBModel, key)
+            if student:
+                self.session.delete(student)
+                self.session.commit()
+                return True
+            else:
+                return False
+        except IntegrityError:
+            self.session.rollback()
+            return False
 
     def get_all(self) -> list[StudentDBModel]:
         return self.session.query(StudentDBModel).all()
