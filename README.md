@@ -39,15 +39,16 @@ This isn't just a student database. It demonstrates:
 ## 🔧 Tech Stack
 
 ```
-Backend:       FastAPI (async web framework)
-Validation:    Pydantic (data models)
-Storage:       JSON (file-based persistence)
-Testing:       pytest + pytest-mock
-Logging:       Python logging module
-Python:        3.10+
+Framework:        FastAPI 0.128.0        (REST API)
+Database:         PostgreSQL 15+         (Persistent storage)
+ORM:              SQLAlchemy 2.0.46      (Object-relational mapping)
+Validation:       Pydantic 2.12.5        (Type checking)
+CLI:              Python match-case      (Built-in 3.10+)
+Testing:          pytest 9.0.2           (Unit & integration tests)
+Mocking:          pytest-mock 3.15.1     (Test isolation)
+Logging:          Python logging         (Structured logs)
+Python:           3.10+
 ```
-
-**No external database needed for this demo.** 
 
 ---
 
@@ -55,7 +56,8 @@ Python:        3.10+
 
 ### Prerequisites
 - Python 3.10 or higher
-- `pip` (Python package manager)
+- PostgreSQL 15+ (running locally or remote)
+- pip (Python package manager)
 
 ### Installation
 
@@ -66,6 +68,14 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+```bash
+# Create database
+createdb student_management_database
+
+# Initialize tables (from Python)
+python -c "from storage_handler.db_handler.db_handler import StudentDB; StudentDB.make_relation()"
+```
 
 # Run the API
 uvicorn main:app --reload
@@ -84,7 +94,7 @@ API available at: http://localhost:8000/docs
 | GET | `/students/search/by_name?name=X` | Search by name |
 | GET | `/percent_student?std=X&roll=Y` | Get student percentage |
 | DELETE | `/delete_students?std=X&roll=Y` | Delete student |
-
+```
 ---
 
 ## 💻 How to Use
@@ -133,70 +143,89 @@ Interactive menu-driven interface for non-technical users.
 
 ## 🏗️ Architecture
 
+### Layered Design
+
 ```
-┌─────────────────────────────────────────┐
-│          FastAPI (main.py)              │
-│      HTTP Request Handling              │
-└────────────────┬────────────────────────┘
-                 ▼
-┌─────────────────────────────────────────┐
-│     StudentManager (services/)          │
-│     Core Business Logic                 │
-│    Duplicate checking                   │
-│    Data transformations                 │
-│    Percentage calculations              │
-└────────────────┬────────────────────────┘
-                 ▼
-┌─────────────────────────────────────────┐
-│      Student Model (models/)            │
-│    Data Structure & Validation          │
-│    Type hints                           │
-│    Percentage property                  │
-└────────────────┬────────────────────────┘
-                 ▼
-┌─────────────────────────────────────────┐
-│    StudentJson (storage_handler/)       │
-│     Persistent Data Layer               │
-│    Atomic file writes                   │
-│    Error recovery                       │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    FastAPI (main.py)                        │
+│              REST API Endpoint Handling                     │
+│         Input validation (Pydantic models)                  │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│              StudentManager (services/)                     │
+│           Business Logic & Orchestration                    │
+│  - Duplicate prevention                                     │
+│  - Data transformation                                      │
+│  - Percentage calculations                                  │
+│  - Cache management                                         │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│        Student Model (models/student.py)                    │
+│     Domain Object & Data Structure                          │
+│  - Properties (@percentage)                                 │
+│  - Serialization (to_dict)                                  │
+│  - Timestamps                                               │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│        Database Layer (storage_handler/)                    │
+│  - StudentDB: Connection & transactions                     │
+│  - db_mapper: Domain ↔ Database conversion                  │
+│  - db_model: SQLAlchemy schema                              │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│            PostgreSQL Database                              │
+│        Persistent Student Records                           │
+└─────────────────────────────────────────────────────────────┘
 ```
 ---
 
 ## 📁 Project Structure
-
 ```
 student-management-system-v2/
 │
-├── main.py                    # FastAPI app + endpoints
+├── main.py                          # FastAPI app & REST endpoints
+│
 ├── models/
-│   └── student.py            # Student data model
+│   ├── __init__.py
+│   └── student.py                   # Student domain model
 │
 ├── services/
-│   └── manager.py            # Business logic
+│   ├── __init__.py
+│   └── manager.py                   # Business logic orchestration
 │
 ├── storage_handler/
-│   └── json_handler.py       # Data persistence (JSON read/write)
+│   ├── __init__.py
+│   ├── json_handler.py              # Legacy JSON persistence (deprecated)
+│   └── db_handler/
+│       ├── __init__.py
+│       ├── db_handler.py            # PostgreSQL connection & queries
+│       ├── db_mapper.py             # Domain ↔ Database mapping
+│       └── db_model.py              # SQLAlchemy schema definitions
 │
 ├── ui/
-│   └── cli.py                # Command-line interface
+│   ├── __init__.py
+│   └── cli.py                       # Command-line interface
 │
 ├── student_logging/
-│   ├── student_log.py        # Logging setup
-│   └── students.log          # Application logs
-│
-├── data/
-│   └── students.json         # Student records (auto-created)
+│   ├── __init__.py
+│   ├── student_log.py               # Logging configuration
+│   └── students.log                 # Application logs
 │
 ├── testing/
-│   ├── test_main.py          # API endpoint tests
-│   ├── test_manager.py       # Business logic tests
-│   ├── test_validators.py    # Validation tests
-│   └── test_json_handler.py  # Storage tests
+│   ├── __init__.py
+│   ├── test_main.py                 # API endpoint tests
+│   ├── test_manager.py              # Business logic tests
+│   ├── test_validators.py           # Input validation tests
+│   └── test_json_handler.py         # Storage layer tests
 │
-├── validators.py             # Input validation
-├── requirements.txt          # Dependencies
-└── README.md                 # This file
+├── validators.py                    # Input validation functions
+├── requirements.txt                 # Project dependencies
+├── .gitignore                       # Git ignore rules
+└── README.md                        # This file
 ```
 
 ---
