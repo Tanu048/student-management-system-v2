@@ -47,4 +47,4 @@ class StudentDB:
             return False
 
     def get_all(self) -> list[StudentDBModel]:
-        return self.session.query(StudentDBModel).all()
+        return self.session.query(StudentDBModel).order_by(StudentDBModel.id).all()
