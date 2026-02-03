@@ -86,14 +86,14 @@ API available at: http://localhost:8000/docs
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/add_students` | Add a new student |
-| GET | `/view_students` | View all students |
-| GET | `/students/search/by_roll?std=X&roll=Y` | Search by roll number |
-| GET | `/students/search/by_name?name=X` | Search by name |
-| GET | `/percent_student?std=X&roll=Y` | Get student percentage |
-| DELETE | `/delete_students?std=X&roll=Y` | Delete student |
+| Method | Endpoint                                | Description            |
+|--------|-----------------------------------------|------------------------|
+| POST   | `/add_students`                         | Add a new student      |
+| GET    | `/view_students`                        | View all students      |
+| GET    | `/students/search/by_roll?std=X&roll=Y` | Search by roll number  |
+| GET    | `/students/search/by_name?name=X`       | Search by name         |
+| GET    | `/percent_student?std=X&roll=Y`         | Get student percentage |
+| DELETE | `/delete_students?std=X&roll=Y`         | Delete student         |
 ```
 ---
 
