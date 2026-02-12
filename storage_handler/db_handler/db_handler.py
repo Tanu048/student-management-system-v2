@@ -1,22 +1,19 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
+
 from storage_handler.db_handler.db_model import StudentDBModel, Base
 from storage_handler.db_handler.db_mapper import student_to_db
 
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql://postgres:postgres@db:5432/student_management_database"
+)
 
 class StudentDB:
-    engine = create_engine(
-        "postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database"
-    )
-    """
-    PostgreSQL connection manager using SQLAlchemy.    
-    Handles database operations with transaction support.
-    Uses connection pooling for efficiency.    
-    Attributes:
-        engine: SQLAlchemy engine (class-level, shared connection pool)
-    """
-
+    engine = create_engine(DATABASE_URL)
+    
     def __init__(self):
         """Initialize a new database session.
         Creates a new session for database operations."""
