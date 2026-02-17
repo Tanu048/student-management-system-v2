@@ -8,7 +8,7 @@ from storage_handler.db_handler.db_mapper import student_to_db
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:postgres@db:5432/student_management_database"
+    "postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database"
 )
 
 class StudentDB:
@@ -17,6 +17,7 @@ class StudentDB:
     def __init__(self):
         """Initialize a new database session.
         Creates a new session for database operations."""
+        Base.metadata.create_all(StudentDB.engine)
         sessionLocal = sessionmaker(bind=StudentDB.engine)
         self.session = sessionLocal()
 
