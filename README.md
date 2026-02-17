@@ -47,6 +47,7 @@ CLI:              Python match-case      (Built-in 3.10+)
 Testing:          pytest 9.0.2           (Unit & integration tests)
 Mocking:          pytest-mock 3.15.1     (Test isolation)
 Logging:          Python logging         (Structured logs)
+Containerization: Docker + Docker Compose 
 Python:           3.10+
 ```
 
@@ -57,9 +58,11 @@ Python:           3.10+
 ### Prerequisites
 - Python 3.10 or higher
 - PostgreSQL 15+ (running locally or remote)
+- Docker & Docker Compose (for containerized setup)
 - pip (Python package manager)
 
-### Installation
+### Option 1 — Local Development (Without Docker)
+#### Installation
 
 ```bash
 # Create virtual environment
@@ -75,17 +78,33 @@ createdb student_management_database
 
 # Initialize tables (from Python)
 python -c "from storage_handler.db_handler.db_handler import StudentDB; StudentDB.make_relation()"
-```
 
 # Run the API
 uvicorn main:app --reload
 ```
 
 API available at: http://localhost:8000/docs
+
+### Option 2 — Run with Docker (Production-Ready Setup)
+ Build & Run Containers
+```
+docker-compose up --build
+```
+ What Docker Handles
+  - Spins up PostgreSQL container
+  - Injects DATABASE_URL environment variable
+  - Builds FastAPI service
+  - Runs API on port 8000
+
+ Stop Containers
+ ```
+docker-compose down
+```
 ---
 
-## 🔌 API Endpoints
 
+## 🔌 API Endpoints
+```
 | Method | Endpoint                                | Description            |
 |--------|-----------------------------------------|------------------------|
 | POST   | `/add_students`                         | Add a new student      |
@@ -224,7 +243,8 @@ student-management-system-v2/
 │
 ├── validators.py                    # Input validation functions
 ├── requirements.txt                 # Project dependencies
-├── .gitignore                       # Git ignore rules
+├── docker-compose.yml
+├── Dockerfile                      # Git ignore rules
 └── README.md                        # This file
 ```
 
@@ -256,10 +276,10 @@ Then open `htmlcov/index.html` in browser.
 
 ## 🐛 Known Limitations (Intentional)
 
-- **JSON storage** - Fine for demo, needs PostgreSQL for production
-- **Single instance** - No clustering/load balancing
-- **No authentication** - Anyone can access all endpoints
-- **No rate limiting** - Could be abused with many requests
+- *No authentication*        Focus on backend engineering fundamentals
+- *No rate limiting*	       Outside scope of demo
+- *Single instance*          No load balancing
+- *JSON storage deprecated*  PostgreSQL used for production
 
 These are deliberate to keep focus on engineering fundamentals.
 
@@ -270,5 +290,5 @@ MIT License - Feel free to use for learning purposes.
 
 ---
 
-**Last Updated:** January 25, 2026
-**Next Version:** Docker + CI/CD (Feb 2026)
+**Last Updated:** Feburary 17, 2026
+**Next Version:** CI/CD pipeline
