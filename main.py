@@ -13,7 +13,7 @@ class ValidateStudent(BaseModel):
     name: str = Field(..., min_length=1)
     std: str = Field(..., min_length=1)
     roll: str = Field(..., min_length=1)
-    marks: List[conint(ge=0, le=100)] = Field(
+    marks: List[int] = Field(
         min_length=1, max_length=5
     )  # best done via annotation
 
