@@ -30,3 +30,30 @@ class StudentDBModel(Base):
     marks = Column(ARRAY(Integer), nullable=False)
     per = Column(Float)
     date_created = Column(DateTime, default=datetime.utcnow)
+
+
+class AdminDBModel(Base):
+    """
+    SQLAlchemy ORM model for Admin database table.
+    Represents the 'admin' table in PostgreSQL.
+    Defines schema, constraints, and relationships.
+    Attributes:
+        id (int): Primary key, auto-incremented
+        name (str): Admin name, required
+        department (str): Admin department, required
+        email (str): Admin email, required
+        username (str): Unique username, required
+        password (str): Hashed password, required
+        admin_key (str): Unique admin key for authentication, required
+    Table: admin
+    """
+
+    __tablename__ = "admin"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    department = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    username = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    role = Column(String, default="admin")

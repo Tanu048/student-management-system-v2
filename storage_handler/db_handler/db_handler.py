@@ -11,6 +11,11 @@ DATABASE_URL = os.getenv(
     "postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database"
 )
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable not set")
+
 class StudentDB:
     engine = create_engine(DATABASE_URL)
     
@@ -46,3 +51,10 @@ class StudentDB:
 
     def get_all(self) -> list[StudentDBModel]:
         return self.session.query(StudentDBModel).order_by(StudentDBModel.id).all()
+
+    def get_db(self):
+        try:
+            yield self.session
+        finally:
+            self.session.close()    
+        return self.session

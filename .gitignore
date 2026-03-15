@@ -10,3 +10,4 @@ testing/test_db_handler.py
 .env
 *.db
 data/
+ai_context.txt

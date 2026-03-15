@@ -68,7 +68,7 @@ class StudentManager:
     def search_by_name(self, name: str) -> dict:
         """Returns matching students keyed by std-roll."""
         LogInfo.log_info("Stduent searched")
-        self.data = self._load_initial_data(self)
+        self.data = self._load_initial_data()
         result = {}
         for key, student in self.data.items():
             if name.lower() in student["name"].lower():
@@ -80,7 +80,7 @@ class StudentManager:
         if key not in self.data:
             return False
         success = self.db.delete_db(key)
-        self.data = self._load_initial_data(self)
+        self.data = self._load_initial_data()
         if success:
             del self.data[key]
             LogInfo.log_info("Student deleted")
