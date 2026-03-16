@@ -29,10 +29,10 @@ This isn't just a student database. It demonstrates:
 | **API Design** | RESTful endpoints with proper HTTP status codes (200, 400, 404, 409) |
 | **Data Validation** | Type hints + Pydantic models + custom validators |
 | **Error Handling** | Graceful failures, meaningful error messages, no print statements |
+| **Auth & RBAC** | JWT authentication with role-based access control (admin / viewer) |
 | **Testing** | 20+ tests covering happy paths, edge cases, and error scenarios |
 | **Logging** | Structured logging for auditing and debugging |
 | **Clean Code** | Separation of concerns (models → services → API → storage) |
-| **Input Validation** | Both CLI and API validate before processing |
 
 ---
 
@@ -43,11 +43,12 @@ Framework:        FastAPI 0.128.0        (REST API)
 Database:         PostgreSQL 15+         (Persistent storage)
 ORM:              SQLAlchemy 2.0.46      (Object-relational mapping)
 Validation:       Pydantic 2.12.5        (Type checking)
+Auth:             PyJWT + pwdlib         (JWT tokens + password hashing)
 CLI:              Python match-case      (Built-in 3.10+)
 Testing:          pytest 9.0.2           (Unit & integration tests)
 Mocking:          pytest-mock 3.15.1     (Test isolation)
 Logging:          Python logging         (Structured logs)
-Containerization: Docker + Docker Compose 
+Containerization: Docker + Docker Compose
 Python:           3.10+
 ```
 
@@ -61,8 +62,24 @@ Python:           3.10+
 - Docker & Docker Compose (for containerized setup)
 - pip (Python package manager)
 
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```
+DATABASE_URL=postgresql://postgres:yourpassword@localhost:5432/student_management_database
+SECRET_KEY=your-secret-key
+ALGORITHM=HS256
+EXPIRE_MINUTES=60
+ADMIN_REGISTRATION_KEY=your-admin-key
+
+# For Docker
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=yourpassword
+POSTGRES_DB=student_management_database
+```
+
 ### Option 1 — Local Development (Without Docker)
-#### Installation
 
 ```bash
 # Create virtual environment
@@ -72,12 +89,8 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-```bash
 # Create database
 createdb student_management_database
-
-# Initialize tables (from Python)
-python -c "from storage_handler.db_handler.db_handler import StudentDB; StudentDB.make_relation()"
 
 # Run the API
 uvicorn main:app --reload
@@ -86,68 +99,59 @@ uvicorn main:app --reload
 API available at: http://localhost:8000/docs
 
 ### Option 2 — Run with Docker (Production-Ready Setup)
- Build & Run Containers
-```
-docker-compose up --build
-```
- What Docker Handles
-  - Spins up PostgreSQL container
-  - Injects DATABASE_URL environment variable
-  - Builds FastAPI service
-  - Runs API on port 8000
 
- Stop Containers
- ```
+```bash
+# Build and start
+docker-compose up --build
+
+# Stop
 docker-compose down
 ```
+
+Docker handles spinning up PostgreSQL, injecting environment variables, and running the API on port 8000.
+
 ---
 
-
 ## 🔌 API Endpoints
-```
-| Method | Endpoint                                | Description            |
-|--------|-----------------------------------------|------------------------|
-| POST   | `/add_students`                         | Add a new student      |
-| GET    | `/view_students`                        | View all students      |
-| GET    | `/students/search/by_roll?std=X&roll=Y` | Search by roll number  |
-| GET    | `/students/search/by_name?name=X`       | Search by name         |
-| GET    | `/percent_student?std=X&roll=Y`         | Get student percentage |
-| DELETE | `/delete_students?std=X&roll=Y`         | Delete student         |
-```
+
+| Method | Endpoint | Role Required | Description |
+|--------|----------|---------------|-------------|
+| POST | `/auth/register` | Public | Register a new user |
+| POST | `/auth/login` | Public | Login and get JWT token |
+| GET | `/auth/is_auth` | Any | Verify token / get current user |
+| GET | `/student/view_students` | admin, viewer | View all students |
+| GET | `/student/search_by_roll?std=X&roll=Y` | admin, viewer | Search by roll number |
+| GET | `/student/search_by_name?name=X` | admin, viewer | Search by name |
+| GET | `/student/percent_student?std=X&roll=Y` | admin, viewer | Get student percentage |
+| POST | `/admin/add_students` | admin | Add a new student |
+| DELETE | `/admin/delete_students?std=X&roll=Y` | admin | Delete a student |
+
 ---
 
 ## 💻 How to Use
 
-### Option 1: Using FastAPI Swagger UI (Easiest)
+### Option 1: FastAPI Swagger UI (Easiest)
 
 1. Run: `uvicorn main:app --reload`
 2. Open: http://localhost:8000/docs
-3. Click any endpoint → Click "Try it out" → Fill in data → Click "Execute"
+3. Register → Login → copy the token → click **Authorize** → use any endpoint
 
-### Option 2: Using cURL
+### Option 2: cURL
 
 ```bash
-# Add a student
-curl -X POST http://localhost:8000/add_students \
+# Register
+curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{
-    "name": "Asha",
-    "std": "10",
-    "roll": "1",
-    "marks": [85, 90, 78, 88, 92]
-  }'
+  -d '{"name":"Asha","department":"IT","email":"asha@example.com","username":"asha","password":"secret123","role":"viewer"}'
 
-# View all students
-curl http://localhost:8000/view_students
+# Login
+curl -X POST http://localhost:8000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"asha","password":"secret123"}'
 
-# Search by roll
-curl "http://localhost:8000/students/search/by_roll?std=10&roll=1"
-
-# Get percentage
-curl "http://localhost:8000/percent_student?std=10&roll=1"
-
-# Delete student
-curl -X DELETE "http://localhost:8000/delete_students?std=10&roll=1"
+# Use token on protected routes
+curl http://localhost:8000/student/view_students \
+  -H "Authorization: Bearer <your_token>"
 ```
 
 ### Option 3: CLI Interface
@@ -162,8 +166,6 @@ Interactive menu-driven interface for non-technical users.
 
 ## 🏗️ Architecture
 
-### Layered Design
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    FastAPI (main.py)                        │
@@ -177,15 +179,6 @@ Interactive menu-driven interface for non-technical users.
 │  - Duplicate prevention                                     │
 │  - Data transformation                                      │
 │  - Percentage calculations                                  │
-│  - Cache management                                         │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────────┐
-│        Student Model (models/student.py)                    │
-│     Domain Object & Data Structure                          │
-│  - Properties (@percentage)                                 │
-│  - Serialization (to_dict)                                  │
-│  - Timestamps                                               │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
@@ -197,76 +190,61 @@ Interactive menu-driven interface for non-technical users.
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
 │            PostgreSQL Database                              │
-│        Persistent Student Records                           │
 └─────────────────────────────────────────────────────────────┘
 ```
+
 ---
 
 ## 📁 Project Structure
+
 ```
 student-management-system-v2/
 │
-├── main.py                          # FastAPI app & REST endpoints
-│
+├── main.py                          # FastAPI app entry point
+├── routers/
+│   ├── auth.py                      # Register, login, token endpoints
+│   ├── admin.py                     # Add/delete students (admin only)
+│   └── student.py                   # View/search students (admin + viewer)
+├── schemas/
+│   ├── admin.py                     # Auth Pydantic models
+│   └── student.py                   # Student Pydantic models
 ├── models/
-│   ├── __init__.py
 │   └── student.py                   # Student domain model
-│
 ├── services/
-│   ├── __init__.py
 │   └── manager.py                   # Business logic orchestration
-│
 ├── storage_handler/
-│   ├── __init__.py
-│   ├── json_handler.py              # Legacy JSON persistence (deprecated)
 │   └── db_handler/
-│       ├── __init__.py
 │       ├── db_handler.py            # PostgreSQL connection & queries
 │       ├── db_mapper.py             # Domain ↔ Database mapping
 │       └── db_model.py              # SQLAlchemy schema definitions
-│
-├── ui/
-│   ├── __init__.py
-│   └── cli.py                       # Command-line interface
-│
 ├── student_logging/
-│   ├── __init__.py
-│   ├── student_log.py               # Logging configuration
-│   └── students.log                 # Application logs
-│
+│   └── student_log.py               # Logging configuration
 ├── testing/
-│   ├── __init__.py
 │   ├── test_main.py                 # API endpoint tests
 │   ├── test_manager.py              # Business logic tests
 │   ├── test_validators.py           # Input validation tests
 │   └── test_json_handler.py         # Storage layer tests
-│
+├── ui/
+│   └── cli.py                       # CLI interface
 ├── validators.py                    # Input validation functions
-├── requirements.txt                 # Project dependencies
-├── docker-compose.yml
-├── Dockerfile                      # Git ignore rules
-└── README.md                        # This file
+├── requirements.txt
+├── docker-compose.yaml
+├── Dockerfile
+└── .env                             # Environment variables (not committed)
 ```
 
 ---
 
 ## 🧪 Testing
 
-### Run All Tests
-
 ```bash
+# Run all tests
 pytest -v
-```
 
-### Run Specific Test File
-
-```bash
+# Run specific file
 pytest testing/test_main.py -v
-```
 
-### Generate Coverage Report
-
-```bash
+# Coverage report
 pytest --cov=. --cov-report=html
 ```
 
@@ -274,21 +252,11 @@ Then open `htmlcov/index.html` in browser.
 
 ---
 
-## 🐛 Known Limitations (Intentional)
-
-- *No authentication*        Focus on backend engineering fundamentals
-- *No rate limiting*	       Outside scope of demo
-- *Single instance*          No load balancing
-- *JSON storage deprecated*  PostgreSQL used for production
-
-These are deliberate to keep focus on engineering fundamentals.
-
----
-
 ## 📄 License
-MIT License - Feel free to use for learning purposes.
+
+MIT License — feel free to use for learning purposes.
 
 ---
 
-**Last Updated:** Feburary 17, 2026
+**Last Updated:** March 2026  
 **Next Version:** CI/CD pipeline
