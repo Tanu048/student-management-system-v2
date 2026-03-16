@@ -1,30 +1,32 @@
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import IntegrityError
+from dotenv import load_dotenv
 
 from storage_handler.db_handler.db_model import StudentDBModel, Base
 from storage_handler.db_handler.db_mapper import student_to_db
 
+load_dotenv()
+
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database"
+    "postgresql://postgres:postgresdatabase2026@localhost:5432/student_management_database",
 )
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL environment variable not set")
 
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
+Base.metadata.create_all(engine)
+
+
 class StudentDB:
-    engine = create_engine(DATABASE_URL)
-    
+
     def __init__(self):
         """Initialize a new database session.
         Creates a new session for database operations."""
-        Base.metadata.create_all(StudentDB.engine)
-        sessionLocal = sessionmaker(bind=StudentDB.engine)
-        self.session = sessionLocal()
+        self.session = SessionLocal()
 
     def add(self, student) -> bool:
         try:
@@ -52,9 +54,11 @@ class StudentDB:
     def get_all(self) -> list[StudentDBModel]:
         return self.session.query(StudentDBModel).order_by(StudentDBModel.id).all()
 
-    def get_db(self):
+    @staticmethod
+    def get_db():
+        """FastAPI dependency: yields a per-request DB session and closes it after."""
+        db: Session = SessionLocal()
         try:
-            yield self.session
+            yield db
         finally:
-            self.session.close()    
-        return self.session
+            db.close()

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime, ARRAY
 from sqlalchemy.orm import declarative_base
-from datetime import datetime
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -29,7 +29,7 @@ class StudentDBModel(Base):
     roll = Column(String, nullable=False)
     marks = Column(ARRAY(Integer), nullable=False)
     per = Column(Float)
-    date_created = Column(DateTime, default=datetime.utcnow)
+    date_created = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class AdminDBModel(Base):
@@ -44,7 +44,6 @@ class AdminDBModel(Base):
         email (str): Admin email, required
         username (str): Unique username, required
         password (str): Hashed password, required
-        admin_key (str): Unique admin key for authentication, required
     Table: admin
     """
 
@@ -53,7 +52,7 @@ class AdminDBModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     department = Column(String, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
-    role = Column(String, default="admin")
+    role = Column(String, default="viewer")

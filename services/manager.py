@@ -2,7 +2,6 @@
 from models.student import Student
 from storage_handler.db_handler.db_handler import StudentDB
 from storage_handler.db_handler.db_mapper import db_to_student_dict
-from storage_handler.json_handler import StudentJson
 from student_logging.student_log import LogInfo
 
 
@@ -80,11 +79,11 @@ class StudentManager:
         if key not in self.data:
             return False
         success = self.db.delete_db(key)
-        self.data = self._load_initial_data()
         if success:
-            del self.data[key]
+            self.data = self._load_initial_data()
             LogInfo.log_info("Student deleted")
         return success
+
 
     def per_calc(self, std: str, roll: str) -> float | None:
         """Calculate and store average percentage for a student."""
