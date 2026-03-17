@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SMS v2{% endblock %}
+{% block body %}
+<div class="wide">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <strong>SMS v2</strong>
+        <span>
+            <span id="user-label" class="muted"></span>
+            &nbsp;<a href="#" onclick="logout()">Logout</a>
+        </span>
+    </div>
+
+    <div class="sidebar">
+        <div class="nav">
+            <a id="n-view"       class="active" onclick="show('view')">All Students</a>
+            <a id="n-search"                    onclick="show('search')">Search</a>
+            <a id="n-percentage"                onclick="show('percentage')">Percentage</a>
+            <a id="n-add"                       onclick="show('add')">Add Student</a>
+            <a id="n-delete"                    onclick="show('delete')">Delete Student</a>
+        </div>
+        <div class="content" id="panel"></div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (!localStorage.getItem('token')) location.href = '/login';
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('user-label').textContent = (user.name || '') + ' (' + (user.role || '') + ')';
+    show('view');
+</script>
+{% endblock %}

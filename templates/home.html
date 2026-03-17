@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}student management system {% endblock %}
+{% block body %}
+<div class="page">
+  <div class="box">
+    <h2>Student Management System v2</h2>
+    <p class="muted">JWT auth · Role-based access · PostgreSQL · Docker</p>
+    <br />
+    <a href="/login"><button>Login</button></a>
+    <a href="/register"><button>Register</button></a>
+    <br />
+    <p class="muted">Viewer — can view and search students.<br />Admin — can also add and delete.</p>
+  </div>
+</div>
+{% endblock %}

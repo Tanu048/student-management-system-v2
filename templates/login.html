@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block body %}
+<div class="page">
+  <div class="box">
+    <h2>Login</h2>
+    <input id="u" type="text"     placeholder="Username" />
+    <input id="p" type="password" placeholder="Password" />
+    <button onclick="doLogin()">Sign in</button>
+    <div id="msg"></div>
+    <br />
+    <p class="muted">No account? <a href="/register">Register</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  if (localStorage.getItem('token')) location.href = '/dashboard';
+
+  async function doLogin() {
+    msg('msg', 'Signing in…', 'muted');
+    try {
+      const d = await api('POST', '/auth/login', { username: u.value.trim(), password: p.value });
+      localStorage.setItem('token', d.access_token);
+      const user = await api('GET', '/auth/is_auth');
+      localStorage.setItem('user', JSON.stringify(user));
+      location.href = '/dashboard';
+    } catch (e) { msg('msg', e, 'err'); }
+  }
+</script>
+{% endblock %}

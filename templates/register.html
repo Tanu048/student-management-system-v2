@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Register — SMS v2{% endblock %}
+{% block body %}
+<div class="page">
+    <div class="box">
+        <h2>Register</h2>
+        <input id="name" type="text" placeholder="Full name" />
+        <input id="dept" type="text" placeholder="Department" />
+        <input id="email" type="email" placeholder="Email" />
+        <input id="uname" type="text" placeholder="Username" />
+        <input id="pass" type="password" placeholder="Password (min 8 chars)" />
+        <select id="role" onchange="toggleKey()">
+            <option value="viewer">Role: Viewer</option>
+            <option value="admin">Role: Admin</option>
+        </select>
+        <input id="akey" type="password" placeholder="Admin key" class="hidden" />
+        <button onclick="doRegister()">Create account</button>
+        <div id="msg"></div>
+        <br />
+        <p class="muted">Have an account? <a href="/login">Login</a></p>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    if (localStorage.getItem('token')) location.href = '/dashboard';
+
+    function toggleKey() {
+        document.getElementById('akey').classList.toggle('hidden', document.getElementById('role').value !== 'admin');
+    }
+
+    async function doRegister() {
+        msg('msg', 'Creating account…', 'muted');
+        const body = {
+            name: document.getElementById('name').value.trim(),
+            department: document.getElementById('dept').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            username: document.getElementById('uname').value.trim(),
+            password: document.getElementById('pass').value,
+            role: document.getElementById('role').value,
+        };
+        if (document.getElementById('role').value === 'admin')
+            body.admin_key = document.getElementById('akey').value
+        try {
+            await api('POST', '/auth/register', body);
+            msg('msg', 'Done! Redirecting to login…', 'ok');
+            setTimeout(() => location.href = '/login', 1200);
+        } catch (e) { msg('msg', e, 'err'); }
+    }
+</script>
+{% endblock %}
