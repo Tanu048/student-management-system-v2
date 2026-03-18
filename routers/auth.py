@@ -52,7 +52,7 @@ def register(user: Admin, db: Session = Depends(StudentDB.get_db)):
         if user.role == "admin":
             if not user.admin_key:
                 raise HTTPException(status_code=400, detail="admin_key is required for admin role")
-            expected_key = os.getenv("ADMIN_REGISTRATION_KEY")
+            expected_key = os.getenv("ADMIN_KEY")
             if not expected_key or user.admin_key != expected_key:
                 raise HTTPException(status_code=403, detail="Invalid admin key")
             
