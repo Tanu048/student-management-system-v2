@@ -6,15 +6,18 @@ A cleanly architected backend system demonstrating **production engineering fund
 
 > Built to show I understand how to build **reliable systems**, not just make things work.
 
+🔗 **Live Demo:** [https://student-management-system-js6u.onrender.com](https://student-management-system-js6u.onrender.com)  
+📖 **API Docs:** [https://student-management-system-js6u.onrender.com/docs](https://student-management-system-js6u.onrender.com/docs)
+
 ---
 
 ## 📋 Quick Navigation
 
 - [What This Project Shows](#-what-this-project-shows)
 - [Tech Stack](#-tech-stack)
+- [Live Demo](#-live-demo)
 - [Getting Started](#-getting-started)
 - [API Endpoints](#-api-endpoints)
-- [How to Use](#-how-to-use)
 - [Architecture](#-architecture)
 - [Testing](#-testing)
 
@@ -49,18 +52,32 @@ Testing:          pytest 9.0.2           (Unit & integration tests)
 Mocking:          pytest-mock 3.15.1     (Test isolation)
 Logging:          Python logging         (Structured logs)
 Containerization: Docker + Docker Compose
+Deployment:       Render
 Python:           3.10+
 ```
 
 ---
 
-## 📦 Getting Started
+## 🚀 Live Demo
 
-### Prerequisites
-- Python 3.10 or higher
-- PostgreSQL 15+ (running locally or remote)
-- Docker & Docker Compose (for containerized setup)
-- pip (Python package manager)
+The API is deployed and live on Render.
+
+| | Link |
+|---|---|
+| **Frontend** | [https://student-management-system-js6u.onrender.com](https://student-management-system-js6u.onrender.com) |
+| **Swagger UI** | [https://student-management-system-js6u.onrender.com/docs](https://student-management-system-js6u.onrender.com/docs) |
+
+**To try it out:**
+1. Go to the frontend link above
+2. Register a viewer account (no key needed)
+3. Login and explore — view students, search, get percentages
+4. To test admin features, register with `role: admin` and the admin key
+
+> ⚠️ Render free tier spins down after inactivity — first request may take ~30 seconds to wake up.
+
+---
+
+## 📦 Getting Started
 
 ### Environment Variables
 
@@ -96,9 +113,9 @@ createdb student_management_database
 uvicorn main:app --reload
 ```
 
-API available at: http://localhost:8000/docs
+API available at: http://localhost:8000
 
-### Option 2 — Run with Docker (Production-Ready Setup)
+### Option 2 — Run with Docker
 
 ```bash
 # Build and start
@@ -107,8 +124,6 @@ docker-compose up --build
 # Stop
 docker-compose down
 ```
-
-Docker handles spinning up PostgreSQL, injecting environment variables, and running the API on port 8000.
 
 ---
 
@@ -125,42 +140,6 @@ Docker handles spinning up PostgreSQL, injecting environment variables, and runn
 | GET | `/student/percent_student?std=X&roll=Y` | admin, viewer | Get student percentage |
 | POST | `/admin/add_students` | admin | Add a new student |
 | DELETE | `/admin/delete_students?std=X&roll=Y` | admin | Delete a student |
-
----
-
-## 💻 How to Use
-
-### Option 1: FastAPI Swagger UI (Easiest)
-
-1. Run: `uvicorn main:app --reload`
-2. Open: http://localhost:8000/docs
-3. Register → Login → copy the token → click **Authorize** → use any endpoint
-
-### Option 2: cURL
-
-```bash
-# Register
-curl -X POST http://localhost:8000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Asha","department":"IT","email":"asha@example.com","username":"asha","password":"secret123","role":"viewer"}'
-
-# Login
-curl -X POST http://localhost:8000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"asha","password":"secret123"}'
-
-# Use token on protected routes
-curl http://localhost:8000/student/view_students \
-  -H "Authorization: Bearer <your_token>"
-```
-
-### Option 3: CLI Interface
-
-```bash
-python -m ui.cli
-```
-
-Interactive menu-driven interface for non-technical users.
 
 ---
 
@@ -217,6 +196,15 @@ student-management-system-v2/
 │       ├── db_handler.py            # PostgreSQL connection & queries
 │       ├── db_mapper.py             # Domain ↔ Database mapping
 │       └── db_model.py              # SQLAlchemy schema definitions
+├── templates/
+│   ├── base.html                    # Shared base template
+│   ├── home.html                    # Landing page
+│   ├── login.html                   # Login page
+│   ├── register.html                # Register page
+│   └── dashboard.html               # Main dashboard
+├── static/
+│   ├── style.css                    # Styles
+│   └── script.js                    # Frontend logic
 ├── student_logging/
 │   └── student_log.py               # Logging configuration
 ├── testing/
@@ -229,8 +217,7 @@ student-management-system-v2/
 ├── validators.py                    # Input validation functions
 ├── requirements.txt
 ├── docker-compose.yaml
-├── Dockerfile
-└── .env                             # Environment variables (not committed)
+└── Dockerfile
 ```
 
 ---
