@@ -5,7 +5,6 @@ student_logging/*.log
 .pytest_cache/
 htmlcov/
 .coverage
-testing/test_db_handler.py
 .dockerignore
 .env
 *.db

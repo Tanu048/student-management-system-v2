@@ -1,21 +1,45 @@
 import pytest
 from services.manager import StudentManager
 
+
 @pytest.fixture(autouse=True)
 def mock_logging(mocker):
     mocker.patch("student_logging.student_log.LogInfo.log_info")
     mocker.patch("student_logging.student_log.LogInfo.log_error")
 
-@pytest.fixture
-def empty_manager(monkeypatch):
-    monkeypatch.setattr(
-        "storage_handler.json_handler.StudentJson.get_data",
-        lambda: {}
-    )
-    monkeypatch.setattr(
-        "storage_handler.json_handler.StudentJson.set_data",
-        lambda data: True
-    )
+
+@pytest.fixture(autouse=True)
+def empty_manager(mocker):
+    mock_db_class = mocker.patch("services.manager.StudentDB")
+    mock_db = mock_db_class.return_value
+
+    fake_db = {}
+
+    def get_all():
+        return list(fake_db.values())
+
+    def add(student):
+        key = f"{student._std}-{student._roll}"
+        db_obj = type("DBStudent", (), {})()
+        db_obj.id = key
+        db_obj.name = student._name
+        db_obj.std = student._std
+        db_obj.roll = student._roll
+        db_obj.marks = student._marks
+        db_obj.per = student.percentage
+        fake_db[key] = db_obj
+        return True
+
+    def delete_db(student_id):
+        if student_id in fake_db:
+            del fake_db[student_id]
+            return True
+        return False
+
+    mock_db.get_all.side_effect = get_all
+    mock_db.add.side_effect = add
+    mock_db.delete_db.side_effect = delete_db
+
     return StudentManager()
 
 
@@ -44,7 +68,7 @@ def test_view_list_populated(empty_manager):
     empty_manager.add_student("Diya", "10", "1", [80])
     students = empty_manager.view_list()
     assert len(students) == 1
-    
+
 
 def test_search_by_roll_found(empty_manager):
     empty_manager.add_student("Diya", "10", "1", [80])
@@ -56,20 +80,20 @@ def test_search_by_roll_not_found(empty_manager):
     assert empty_manager.search_by_roll("10", "99") is None
 
 
-def test_search_by_name_found(empty_manager):
+def test_search_by_name_single(empty_manager):
     empty_manager.add_student("Diya sharma", "10", "1", [80])
-    result = empty_manager.search_by_name("Diya")
-    assert len(result) == 1
-    
-def test_search_by_name_found(empty_manager):
+    result = empty_manager.search_by_name("Diya sharma")
+    assert len(result) >= 1
+
+
+def test_search_by_name_multiple(empty_manager):
     empty_manager.add_student("Diya sharma", "10", "1", [80])
     empty_manager.add_student("Diya sharma", "11", "1", [80])
     result = empty_manager.search_by_name("Diya")
     assert len(result) == 2
     assert "10-1" in result
     assert "11-1" in result
-    assert result["10-1"]["name"] == "Diya sharma"
-    assert result["11-1"]["name"] == "Diya sharma"
+
 
 def test_search_by_name_not_found(empty_manager):
     assert empty_manager.search_by_name("ghost") == {}

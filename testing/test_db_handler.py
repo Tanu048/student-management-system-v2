@@ -1,12 +1,27 @@
 from storage_handler.db_handler.db_handler import StudentDB
 from models.student import Student
 
+def test_add_success(mocker):
+    mock_session = mocker.Mock()
 
-def test_db_add_success():
+    mocker.patch(
+        "storage_handler.db_handler.db_handler.SessionLocal",
+        return_value=mock_session
+    )
+
     db = StudentDB()
-    student = Student("Ashi", "1", "1", [10, 10, 10, 10, 10])
+
+    student = mocker.Mock()
+    mocker.patch(
+        "storage_handler.db_handler.db_handler.student_to_db",
+        return_value=student
+    )
+
     result = db.add(student)
+
     assert result is True
+    mock_session.add.assert_called_once()
+    mock_session.commit.assert_called_once()
 
 
 def test_db_add_duplicate():
